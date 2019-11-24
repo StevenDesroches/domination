@@ -1,0 +1,11 @@
+winCount: 20
+sync: true
+locations:
+  zone:
+    yMax: 10
+    yMin: 0
+    xMax: 10
+    xMin: 0
+    zMin: 10
+    zMax: 0
+    world: world
