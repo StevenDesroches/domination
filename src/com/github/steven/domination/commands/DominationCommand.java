@@ -1,18 +1,13 @@
 package com.github.steven.domination.commands;
 
 import com.github.steven.domination.Domination;
-import com.github.steven.domination.datatypes.Cuboid;
-import com.github.steven.domination.helpers.listHelper;
-import com.github.steven.domination.runnables.DominationRunnable;
+import com.github.steven.domination.datatypes.DominationObj;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import java.util.HashMap;
-
 public class DominationCommand implements CommandExecutor {
-    private static DominationRunnable dominationRunnable;
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
@@ -29,6 +24,12 @@ public class DominationCommand implements CommandExecutor {
                 case "reload":
                     commandState = reload(commandSender);
                     break;
+                case "auto":
+                    commandState = auto(commandSender);
+                    break;
+                case "autoStop":
+                    commandState = autoStop(commandSender);
+                    break;
             }
         }
 
@@ -39,22 +40,7 @@ public class DominationCommand implements CommandExecutor {
         boolean returnVar = false;
         if (commandSender.hasPermission("domination.commands.domination")) {
             returnVar = true;
-            Cuboid currentCuboid = listHelper.getRandomCuboid(Domination.getCuboidList());
-            Domination.getInstance().currentCuboid = currentCuboid;
-
-            dominationRunnable = new DominationRunnable();
-            if (Domination.getRunSync()) {
-                dominationRunnable.runTaskTimer(Domination.getInstance(), 0, 20);
-            } else {
-                dominationRunnable.runTaskTimerAsynchronously(Domination.getInstance(), 0, 20);
-            }
-            Domination.getInstance().dominationPlayersPoint = new HashMap<>();
-
-            String world = currentCuboid.getPoint1().getWorld().getName();
-            double x[] = {currentCuboid.getPoint1().getX(), currentCuboid.getPoint2().getX()};
-            double z[] = {currentCuboid.getPoint1().getZ(), currentCuboid.getPoint2().getZ()};
-            Domination.getDynmap().createAreaMarker(world, x, z);
-            Bukkit.broadcastMessage("[Domination] start");
+            Domination.getInstance().createDominationEvent();
         } else {
             commandSender.sendMessage("Vous n'avez pas la permission d'utiliser cette commande");
         }
@@ -65,12 +51,10 @@ public class DominationCommand implements CommandExecutor {
         boolean returnVar = false;
         if (commandSender.hasPermission("domination.commands.domination")) {
             returnVar = true;
-            if (dominationRunnable != null) {
-                dominationRunnable.cancel();
-            }
-            if(Domination.getDynmap().getAreaMarker() != null){
-                Domination.getDynmap().deleteCurrentDominationMarker();
-            }
+            Domination instance = Domination.getInstance();
+            DominationObj dominationEvent = instance.getEvent();
+            dominationEvent.cancelDominationEvent();
+            dominationEvent.removeDynmapMarker();
             Bukkit.broadcastMessage("[Domination] end");
         } else {
             commandSender.sendMessage("Vous n'avez pas la permission d'utiliser cette commande");
@@ -82,6 +66,28 @@ public class DominationCommand implements CommandExecutor {
         boolean returnVar = false;
         if (commandSender.hasPermission("domination.commands.reload")) {
             Domination.getInstance().customLoadConfig();
+            returnVar = true;
+        } else {
+            commandSender.sendMessage("Vous n'avez pas la permission d'utiliser cette commande");
+        }
+        return returnVar;
+    }
+
+    private boolean auto(CommandSender commandSender) {
+        boolean returnVar = false;
+        if (commandSender.hasPermission("domination.commands.auto")) {
+            Domination.getInstance().createAutoChanceRunnable();
+            returnVar = true;
+        } else {
+            commandSender.sendMessage("Vous n'avez pas la permission d'utiliser cette commande");
+        }
+        return returnVar;
+    }
+
+    private boolean autoStop(CommandSender commandSender) {
+        boolean returnVar = false;
+        if (commandSender.hasPermission("domination.commands.auto.stop")) {
+            Domination.getInstance().stopAutoChanceRunnable();
             returnVar = true;
         } else {
             commandSender.sendMessage("Vous n'avez pas la permission d'utiliser cette commande");

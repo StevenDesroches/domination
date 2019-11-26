@@ -8,9 +8,9 @@ import org.dynmap.markers.MarkerSet;
 
 public class Dynmap {
 
-    private static DynmapAPI dynApi;
-    private static MarkerSet markerset;
-    private static AreaMarker currentDominationMarker;
+    private DynmapAPI dynApi;
+    private MarkerSet markerset;
+    private AreaMarker currentDominationMarker;
 
     public DynmapAPI getDynApi() {
         return dynApi;
@@ -29,19 +29,18 @@ public class Dynmap {
     }
 
     public Dynmap(JavaPlugin p) {
-        dynApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
-        if (dynApi == null) {
+        this.dynApi = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
+        if (this.dynApi == null) {
             Bukkit.getServer().getPluginManager().disablePlugin(p);
         } else {
-            markerset = dynApi.getMarkerAPI().createMarkerSet("dominationMarkerSetId", "dominationMarkerSet", dynApi.getMarkerAPI().getMarkerIcons(), false);
+            this.markerset = this.dynApi.getMarkerAPI().createMarkerSet("dominationMarkerSetId", "dominationMarkerSet", this.dynApi.getMarkerAPI().getMarkerIcons(), false);
         }
     }
 
     public void createAreaMarker(String world, double[] x, double[] z) {
-        AreaMarker marker = markerset.createAreaMarker("dominationAreaMarkerId", "dominationAreaMarker", true,
+        this.currentDominationMarker = this.markerset.createAreaMarker("dominationAreaMarkerId", "dominationAreaMarker", true,
                 world, x, z, false);
-        marker.setFillStyle(1, 0x42f4f1);
-        currentDominationMarker = marker;
+        this.currentDominationMarker.setFillStyle(1, 0x42f4f1);
     }
 
 }

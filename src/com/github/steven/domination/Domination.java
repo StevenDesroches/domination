@@ -2,7 +2,9 @@ package com.github.steven.domination;
 
 import com.github.steven.domination.commands.DominationCommand;
 import com.github.steven.domination.datatypes.Cuboid;
-import com.github.steven.domination.datatypes.Dynmap;
+import com.github.steven.domination.datatypes.DominationObj;
+import com.github.steven.domination.helpers.listHelper;
+import com.github.steven.domination.runnables.ChanceRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,30 +14,25 @@ import java.util.*;
 public class Domination extends JavaPlugin {//
 
     private static Domination instance;
-    private static Dynmap dynmap;
+
     private static List<Cuboid> cuboidList = new ArrayList<>();
     private static UUID currentLeader;
     private static int currentLeaderPoint = 0;
-    private static boolean runSync;
+    private DominationObj event;
+    private ChanceRunnable chanceRunnable;
 
-    public int winCount;
-    public Cuboid currentCuboid;
     public HashMap<UUID, Integer> dominationPlayersPoint;
 
     public static Domination getInstance() {
         return instance;
     }
 
-    public static Dynmap getDynmap() {
-        return dynmap;
+    public DominationObj getEvent() {
+        return this.event;
     }
 
     public static List<Cuboid> getCuboidList() {
         return cuboidList;
-    }
-
-    public static boolean getRunSync() {
-        return runSync;
     }
 
     public static UUID getCurrentLeader() {
@@ -62,7 +59,7 @@ public class Domination extends JavaPlugin {//
 
         this.getCommand("domination").setExecutor(new DominationCommand());
 
-        dynmap = new Dynmap(instance);
+        this.event = new DominationObj(this);
     }
 
     @Override
@@ -73,8 +70,9 @@ public class Domination extends JavaPlugin {//
     public void customLoadConfig() {
         instance.reloadConfig();
         System.out.println("[domination] config reloaded");
-        winCount = getConfig().getInt("winCount");
-        runSync = getConfig().getBoolean("sync");
+        this.event.setWinCount(getConfig().getInt("winCount"));
+        this.event.setRunSync(getConfig().getBoolean("sync"));
+
         for (String key : getConfig().getConfigurationSection("locations").getKeys(false)) {
             String world = getConfig().getString("locations." + key + ".world");
             double xMin = getConfig().getDouble("locations." + key + ".xMin");
@@ -88,6 +86,29 @@ public class Domination extends JavaPlugin {//
             Location loc2 = new Location(Bukkit.getWorld(world), xMax, yMax, zMax);
 
             cuboidList.add(new Cuboid(loc1, loc2));
+        }
+    }
+
+    public void createDominationEvent() {
+        Domination instance = Domination.getInstance();
+        Cuboid currentCuboid = listHelper.getRandomCuboid(Domination.getCuboidList());
+        DominationObj dominationEvent = instance.getEvent();
+        dominationEvent.setCurrentCuboid(currentCuboid);
+        dominationEvent.runDominationEvent(instance);
+        dominationEvent.createDynmapMarker();
+        instance.dominationPlayersPoint = new HashMap<>();
+    }
+
+    public void createAutoChanceRunnable() {
+        if (this.chanceRunnable == null || this.chanceRunnable.isCancelled()) {
+            this.chanceRunnable = new ChanceRunnable();
+            this.chanceRunnable.runTaskTimerAsynchronously(instance, 0, 20);
+        }
+    }
+
+    public void stopAutoChanceRunnable(){
+        if (this.chanceRunnable != null) {
+            this.chanceRunnable.cancel();
         }
     }
 
