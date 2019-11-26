@@ -1,5 +1,5 @@
 name: domination
-version: 1.0.0
+version: 1.1.0
 author: stecool
 main: com.github.steven.domination.Domination
 api-version: 1.12.2
@@ -11,4 +11,4 @@ permissions:
   domination.commands.domination:
     description: Let you use the domination command
   domination.commands.reload:
-    description: Let you use the domination command
+    description: Let you use the domination command/

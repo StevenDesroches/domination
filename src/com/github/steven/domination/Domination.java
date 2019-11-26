@@ -55,11 +55,11 @@ public class Domination extends JavaPlugin {//
     public void onEnable() {
         instance = this;
         this.saveDefaultConfig();
+        this.event = new DominationObj(instance);
         customLoadConfig();
 
         this.getCommand("domination").setExecutor(new DominationCommand());
 
-        this.event = new DominationObj(this);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class Domination extends JavaPlugin {//
     public void createAutoChanceRunnable() {
         if (this.chanceRunnable == null || this.chanceRunnable.isCancelled()) {
             this.chanceRunnable = new ChanceRunnable();
-            this.chanceRunnable.runTaskTimerAsynchronously(instance, 0, 20);
+            this.chanceRunnable.runTaskTimerAsynchronously(instance, 0, 72000);
         }
     }
 
