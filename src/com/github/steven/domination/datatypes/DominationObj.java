@@ -10,6 +10,7 @@ import java.util.UUID;
 public class DominationObj {
 
     private DominationRunnable dominationRunnable;
+    private boolean isRunning = false;
     private Dynmap dynmap;
     private UUID currentLeader;
     private int currentLeaderPoint = 0;
@@ -22,21 +23,27 @@ public class DominationObj {
     }
 
     public void runDominationEvent(Domination instance) {
-        if (this.dominationRunnable == null || this.dominationRunnable.isCancelled()) {
+        if (!this.isRunning) {
             this.dominationRunnable = new DominationRunnable();
             if (this.getRunSync()) {
                 this.dominationRunnable.runTaskTimer(instance, 0, 20);
             } else {
                 this.dominationRunnable.runTaskTimerAsynchronously(instance, 0, 20);
             }
+            this.isRunning = true;
+            Bukkit.broadcastMessage("[Domination] start");
         }
-        Bukkit.broadcastMessage("[Domination] start");
+    }
+
+    public boolean isRunning() {
+        return this.isRunning;
     }
 
     public void cancelDominationEvent() {
-        if (this.dominationRunnable != null) {
+        if (this.isRunning) {
             this.dominationRunnable.cancel();
             this.dominationRunnable = null;
+            this.isRunning = false;
         }
     }
 

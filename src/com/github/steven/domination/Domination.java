@@ -90,13 +90,14 @@ public class Domination extends JavaPlugin {//
     }
 
     public void createDominationEvent() {
-        Domination instance = Domination.getInstance();
-        Cuboid currentCuboid = listHelper.getRandomCuboid(Domination.getCuboidList());
-        DominationObj dominationEvent = instance.getEvent();
-        dominationEvent.setCurrentCuboid(currentCuboid);
-        dominationEvent.runDominationEvent(instance);
-        dominationEvent.createDynmapMarker();
-        instance.dominationPlayersPoint = new HashMap<>();
+        if (!this.event.isRunning()) {
+            Domination instance = Domination.getInstance();
+            Cuboid currentCuboid = listHelper.getRandomCuboid(Domination.getCuboidList());
+            this.event.setCurrentCuboid(currentCuboid);
+            this.event.runDominationEvent(instance);
+            this.event.createDynmapMarker();
+            instance.dominationPlayersPoint = new HashMap<>();
+        }
     }
 
     public void createAutoChanceRunnable() {
@@ -106,7 +107,7 @@ public class Domination extends JavaPlugin {//
         }
     }
 
-    public void stopAutoChanceRunnable(){
+    public void stopAutoChanceRunnable() {
         if (this.chanceRunnable != null) {
             this.chanceRunnable.cancel();
         }
